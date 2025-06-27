@@ -1,0 +1,124 @@
+
+# Arttifai Tech - Python Project: Image Converter
+
+## AIM:
+To develop a Python-based Image Converter that allows users to convert images between different formats (JPG, PNG, BMP, GIF, etc.) with additional features like batch processing, resizing, and compression.
+
+---
+
+## OBJECTIVES:
+- ✓ Implement image format conversion using Python libraries like PIL & OpenCV.
+- ✓ Develop a Graphical User Interface (GUI) using Tkinter for easy user interaction.
+- ✓ Allow users to select and upload images for conversion.
+- ✓ Provide batch processing support to convert multiple images at once.
+- ✓ Ensure error handling for unsupported file formats and corrupted images.
+- ✓ Optimize the program for fast and efficient processing.
+
+---
+
+## EXPECTED OUTPUT:
+- ✓ A functional Image Converter application with a simple Tkinter GUI.
+- ✓ Users can upload an image, select an output format, and convert it with a click.
+- ✓ Converted images are saved in the user-selected directory.
+- ✓ Users can convert multiple images at once using batch processing.
+- ✓ Additional options for resizing and compressing images before conversion.
+- ✓ Smooth user experience with error handling and progress messages.
+
+---
+
+## FULL SOURCE CODE:
+
+```python
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+from PIL import Image
+
+class ImageConverterApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Image Converter")
+        self.root.geometry("400x400")
+        self.images = []
+        
+        self.create_widgets()
+
+    def create_widgets(self):
+        tk.Label(self.root, text="Image Converter", font=("Arial", 16, "bold")).pack(pady=10)
+        tk.Button(self.root, text="Upload Images", command=self.upload_images).pack(pady=10)
+        tk.Label(self.root, text="Select Output Format:").pack()
+        self.format_var = tk.StringVar()
+        self.format_menu = ttk.Combobox(self.root, textvariable=self.format_var, state="readonly")
+        self.format_menu['values'] = ("JPEG", "PNG", "BMP", "GIF")
+        self.format_menu.pack()
+        tk.Label(self.root, text="Resize (Optional)").pack(pady=5)
+        self.width_entry = tk.Entry(self.root)
+        self.width_entry.pack()
+        self.width_entry.insert(0, "Width")
+        self.height_entry = tk.Entry(self.root)
+        self.height_entry.pack()
+        self.height_entry.insert(0, "Height")
+        tk.Label(self.root, text="Compression Quality (1-95):").pack()
+        self.quality_scale = tk.Scale(self.root, from_=1, to=95, orient=tk.HORIZONTAL)
+        self.quality_scale.set(85)
+        self.quality_scale.pack()
+        tk.Button(self.root, text="Convert and Save", command=self.convert_images).pack(pady=20)
+
+    def upload_images(self):
+        filetypes = [("Image Files", "*.jpg *.jpeg *.png *.bmp *.gif")]
+        self.images = filedialog.askopenfilenames(title="Select Images", filetypes=filetypes)
+        if self.images:
+            messagebox.showinfo("Selected", f"{len(self.images)} image(s) selected.")
+
+    def convert_images(self):
+        if not self.images:
+            messagebox.showwarning("No Images", "Please upload images to convert.")
+            return
+        output_format = self.format_var.get()
+        if not output_format:
+            messagebox.showwarning("No Format", "Please select an output format.")
+            return
+        output_dir = filedialog.askdirectory(title="Select Output Folder")
+        if not output_dir:
+            return
+        width = self.width_entry.get()
+        height = self.height_entry.get()
+        try:
+            resize = (int(width), int(height)) if width.isdigit() and height.isdigit() else None
+        except:
+            resize = None
+        quality = self.quality_scale.get()
+        success = 0
+        for image_path in self.images:
+            try:
+                img = Image.open(image_path)
+                if resize:
+                    img = img.resize(resize)
+                filename = os.path.basename(image_path)
+                name, _ = os.path.splitext(filename)
+                save_path = os.path.join(output_dir, f"{name}_converted.{output_format.lower()}")
+                img = img.convert("RGB")
+                img.save(save_path, output_format, quality=quality)
+                success += 1
+            except Exception as e:
+                print(f"Failed to convert {image_path}: {e}")
+        messagebox.showinfo("Done", f"Successfully converted {success} out of {len(self.images)} image(s).")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ImageConverterApp(root)
+    root.mainloop()
+```
+
+---
+
+## HOW TO RUN:
+1. Save as `image_converter.py`.
+2. Install Pillow using `pip install pillow`.
+3. Run using `python image_converter.py`.
+
+---
+
+## SAMPLE UI:
+- GUI with Upload, Format Selector, Resize, and Convert button.
+- Shows user alerts and handles errors.
